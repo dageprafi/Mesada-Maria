@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#6C63FF">
+<title>Mesada da Maria</title>
+<style>
+:root{--bg:#f7f7fb;--card:#fff;--text:#25253a;--muted:#74748a;--accent:#6c63ff;--border:#e8e8f0;--green:#2fa36b;--danger:#d9534f}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--text)}
+main{max-width:620px;margin:auto;padding:18px 16px 36px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}.hello{font-size:14px;color:var(--muted)}h1{margin:2px 0;font-size:27px}.month{background:#fff;border:1px solid var(--border);border-radius:14px;padding:9px 11px;font-weight:700}
+.card{background:var(--card);border:1px solid var(--border);border-radius:22px;padding:18px;margin:12px 0}.hero{background:linear-gradient(135deg,#eeeefe,#fff);border:0}.hero small{color:var(--muted)}.amount{font-size:34px;font-weight:800;margin:3px 0 4px}.sub{font-size:13px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.box{padding:15px;border-radius:18px;border:1px solid var(--border);min-width:0}.icon{font-size:25px}.name{font-weight:800;margin-top:6px}.desc{font-size:12px;color:var(--muted);min-height:32px;margin-top:3px}.balance{font-size:23px;font-weight:800;margin-top:8px}.alloc{font-size:12px;color:var(--muted)}
+.progress{height:8px;background:#eeeef5;border-radius:99px;overflow:hidden;margin-top:9px}.bar{height:100%;background:var(--accent);width:0%;transition:.2s}
+button{border:0;border-radius:15px;padding:13px 16px;font-size:15px;font-weight:800;cursor:pointer}.primary{width:100%;background:var(--accent);color:#fff;font-size:17px;padding:15px}.secondary{background:#f0efff;color:#4f47d8}.danger{background:#fff0ef;color:var(--danger);font-size:13px}.row{display:flex;gap:9px;align-items:center;justify-content:space-between}.row>*{min-width:0}.section-title{font-weight:800;font-size:17px;margin-bottom:10px}
+input,select{width:100%;padding:13px;border:1px solid var(--border);border-radius:13px;background:#fff;font-size:16px;margin-top:6px;color:var(--text)}label{display:block;font-size:13px;font-weight:700;margin:10px 0}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}
+.hidden{display:none}.tx{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid var(--border)}.tx:last-child{border-bottom:0}.txmain{min-width:0}.txdesc{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.txmeta{font-size:12px;color:var(--muted);margin-top:2px}.in{color:var(--green);font-weight:800}.out{color:var(--danger);font-weight:800}.empty{text-align:center;color:var(--muted);padding:18px 5px;font-size:14px}
+.goalbar{height:12px;background:#eeeef5;border-radius:99px;overflow:hidden}.goalfill{height:100%;background:var(--green);width:0%;transition:.2s}.goalnums{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:6px}
+@media(max-width:430px){main{padding:14px 12px}.grid{gap:9px}.box{padding:13px}.desc{min-height:45px}.form-grid{grid-template-columns:1fr}.full{grid-column:auto}}
+</style>
+</head>
+<body>
+<main>
+  <div class="top">
+    <div><div class="hello">Meu dinheiro 💜</div><h1>Mesada da Maria</h1></div>
+    <div class="month" id="month"></div>
+  </div>
+
+  <section class="card hero">
+    <small>Saldo total das caixinhas</small>
+    <div class="amount" id="total">R$ 0,00</div>
+    <div class="sub" id="received">Nenhuma mesada registrada ainda</div>
+  </section>
+
+  <section class="grid" id="boxes"></section>
+
+  <button class="primary" id="openForm">＋ Registrar movimentação</button>
+
+  <section class="card hidden" id="formCard">
+    <div class="section-title">Nova movimentação</div>
+    <form id="form">
+      <div class="form-grid">
+        <label class="full">O que aconteceu?
+          <select id="kind" required>
+            <option value="mesada">💰 Recebi minha mesada</option>
+            <option value="gasto">💸 Fiz um gasto</option>
+          </select>
+        </label>
+        <label>Valor
+          <input id="value" type="number" inputmode="decimal" min="0.01" step="0.01" placeholder="0,00" required>
+        </label>
+        <label id="catWrap">Caixinha
+          <select id="category"></select>
+        </label>
+        <label class="full">Descrição
+          <input id="description" type="text" maxlength="60" placeholder="Ex.: creme, sorvete..." required>
+        </label>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <button type="button" class="secondary" id="cancel">Cancelar</button>
+        <button type="submit" class="primary" style="width:auto;flex:1">Salvar</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="card">
+    <div class="row"><div class="section-title" style="margin:0">🎯 Minha meta</div><button class="secondary" id="editGoal">Editar</button></div>
+    <div id="goalName" style="font-weight:800;margin-top:8px">Uma coisa especial</div>
+    <div class="goalbar" style="margin-top:12px"><div class="goalfill" id="goalFill"></div></div>
+    <div class="goalnums"><span id="goalSaved">R$ 0,00 guardados</span><span id="goalTarget">Meta: R$ 200,00</span></div>
+    <div id="goalForm" class="hidden" style="margin-top:8px">
+      <label>O que você quer conquistar?
+        <input id="goalInput" maxlength="50">
+      </label>
+      <label>Quanto custa?
+        <input id="goalTargetInput" type="number" inputmode="decimal" min="1" step="0.01">
+      </label>
+      <button class="secondary" id="saveGoal" type="button">Salvar meta</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="section-title">📋 Últimas movimentações</div>
+    <div id="history"></div>
+  </section>
+
+  <button class="danger" id="reset">Zerar tudo</button>
+</main>
+
+<script>
+(function(){
+const KEY="mesada-maria-v2";
+const cats=[
+ {id:"gastar",label:"🛍️ Gastar",pct:.45,desc:"Roupas, cremes e coisas de uso pessoal"},
+ {id:"besteiras",label:"🍭 Besteiras",pct:.30,desc:"Doces, brinquedinhos e vontades"},
+ {id:"guardar",label:"🐷 Guardar",pct:.20,desc:"Uma coisa maior que eu quero"},
+ {id:"doar",label:"❤️ Doar",pct:.05,desc:"Ajudar alguém ou alguma causa"}
+];
+let state=load();
+function load(){
+ try{const x=JSON.parse(localStorage.getItem(KEY));if(x&&Array.isArray(x.tx))return x}catch(e){}
+ return {tx:[],goal:{name:"Uma coisa especial",target:200}};
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(state));render()}
+function money(n){return new Intl.NumberFormat("pt-BR",{style:"currency",currency:"BRL"}).format(Number(n)||0)}
+function esc(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+function received(){return state.tx.filter(x=>x.kind==="mesada").reduce((a,x)=>a+x.value,0)}
+function spent(id){return state.tx.filter(x=>x.kind==="gasto"&&x.cat===id).reduce((a,x)=>a+x.value,0)}
+function saved(){return received()*0.20-spent("guardar")}
+function render(){
+ document.getElementById("month").textContent=new Intl.DateTimeFormat("pt-BR",{month:"short"}).format(new Date()).replace(".","");
+ const rec=received(), total=cats.reduce((a,c)=>a+Math.max(rec*c.pct-spent(c.id),0),0);
+ document.getElementById("total").textContent=money(total);
+ document.getElementById("received").textContent=rec?money(rec)+" em mesadas registradas":"Nenhuma mesada registrada ainda";
+ document.getElementById("boxes").innerHTML=cats.map(c=>{
+   const alloc=rec*c.pct, balance=alloc-spent(c.id), used=alloc?Math.min(spent(c.id)/alloc*100,100):0;
+   return `<div class="box"><div class="icon">${c.label.split(" ")[0]}</div><div class="name">${c.label.substring(c.label.indexOf(" ")+1)}</div><div class="desc">${c.desc}</div><div class="balance">${money(balance)}</div><div class="alloc">${money(alloc)} recebidos</div><div class="progress"><div class="bar" style="width:${used}%"></div></div></div>`;
+ }).join("");
+ document.getElementById("history").innerHTML=state.tx.length?state.tx.slice().reverse().slice(0,12).map(x=>{
+   const d=new Date(x.date).toLocaleDateString("pt-BR");
+   const cat=x.kind==="mesada"?"💰 Mesada":cats.find(c=>c.id===x.cat)?.label||"";
+   return `<div class="tx"><div class="txmain"><div class="txdesc">${esc(x.description)}</div><div class="txmeta">${d} · ${cat}</div></div><div class="${x.kind==="mesada"?"in":"out"}">${x.kind==="mesada"?"+":"−"} ${money(x.value)}</div></div>`
+ }).join(""):'<div class="empty">Ainda não há movimentações.<br>Comecem registrando a primeira mesada! 💜</div>';
+ const sv=Math.max(saved(),0), target=Math.max(Number(state.goal.target)||1,1), pct=Math.min(sv/target*100,100);
+ document.getElementById("goalName").textContent=state.goal.name;
+ document.getElementById("goalSaved").textContent=money(sv)+" guardados";
+ document.getElementById("goalTarget").textContent="Meta: "+money(target);
+ document.getElementById("goalFill").style.width=pct+"%";
+}
+function fillCats(){document.getElementById("category").innerHTML=cats.map(c=>`<option value="${c.id}">${c.label}</option>`).join("")}
+document.getElementById("openForm").addEventListener("click",()=>{document.getElementById("formCard").classList.remove("hidden");document.getElementById("value").focus()});
+document.getElementById("cancel").addEventListener("click",()=>document.getElementById("formCard").classList.add("hidden"));
+document.getElementById("kind").addEventListener("change",e=>document.getElementById("catWrap").classList.toggle("hidden",e.target.value==="mesada"));
+document.getElementById("form").addEventListener("submit",e=>{
+ e.preventDefault();
+ const kind=document.getElementById("kind").value, value=Number(document.getElementById("value").value);
+ if(!Number.isFinite(value)||value<=0){alert("Digite um valor maior que zero.");return}
+ const desc=document.getElementById("description").value.trim();
+ if(!desc){alert("Digite uma descrição.");return}
+ state.tx.push({date:new Date().toISOString(),kind,value,cat:kind==="gasto"?document.getElementById("category").value:null,description:desc});
+ e.target.reset();document.getElementById("catWrap").classList.remove("hidden");document.getElementById("formCard").classList.add("hidden");save();
+});
+document.getElementById("editGoal").addEventListener("click",()=>{
+ const f=document.getElementById("goalForm");f.classList.toggle("hidden");
+ document.getElementById("goalInput").value=state.goal.name;document.getElementById("goalTargetInput").value=state.goal.target;
+});
+document.getElementById("saveGoal").addEventListener("click",()=>{
+ const name=document.getElementById("goalInput").value.trim(), target=Number(document.getElementById("goalTargetInput").value);
+ if(!name||!Number.isFinite(target)||target<=0){alert("Preencha a meta corretamente.");return}
+ state.goal={name,target};document.getElementById("goalForm").classList.add("hidden");save();
+});
+document.getElementById("reset").addEventListener("click",()=>{
+ if(confirm("Isso vai apagar todas as movimentações e voltar a zero. Continuar?")){state={tx:[],goal:{name:"Uma coisa especial",target:200}};save()}
+});
+fillCats();render();
+})();
+</script>
+</body>
+</html>
